@@ -1,50 +1,42 @@
 #pragma once
 
+
 typedef struct USERDATA
 {
-	int age;
-	char name[32];
-	char phone[32];
-	struct USERDATA* pPrev;
-	struct USERDATA* pNext;
+	int page;
+	char title[64];
+	char author[32];
 } USERDATA;
 
+typedef struct NODE
+{
+	void* pData;
+	struct NODE* pNext;
+	struct NODE* pPrev;
+	char* (*GetKey)(void* thisPointer);
+} NODE;
 
-USERDATA g_HeadNode;
-USERDATA g_TailNode;
-static unsigned int g_listLen;
 
-unsigned int GetListLength();
-unsigned int RecalcListLen(void);
-void ResetList(void);
-void ReleaseList(void);
+extern NODE g_HeadNode;
+extern NODE g_TailNode;
 
 void ReleaseIndex(void);
-void** MakeIndexAge(unsigned int* pCnt);
-void** MakeIndexName(int* pCnt);
-void UpdateIndexAll(void);
+NODE** UpdateIndex(void);
+NODE** MakeIndexPage(unsigned int* pCnt);
 
-void AddNewNodeAtTail(int age, const char* pszName, const char* pszPhone);
-
-
-void Enqueue(USERDATA* pUser);
-USERDATA* Dequeue(void);
-
-void Push(USERDATA* pUser);
-USERDATA* Pop(void);
-
+void InitList(void);
+void ReleaseList(void);
+unsigned int GetListCount(void);
 int IsEmpty(void);
 
-void RemoveNode(USERDATA* pRemove);
-void CopyNodeData(USERDATA* pDest, USERDATA* pOri);
-void SwapNode(USERDATA* pLeft, USERDATA* pRight);
+void* GetKey(void* thisPointer, const char* key);
+void SwapNode(NODE* pLeft, NODE* pRight);
 
-void SortListByAge(void);
-void SortListByName(void);
+void AddNewNode(int page, char* pszTitle, char* pszAuthor);
+void RemoveNodeByKeyword(char* pszUserInput, char* key, int* pCount);
+void** SearchListByKeyword(char* pszUserInput, char* key, int* pCount);
+void** SearchListByPageRange(int min, int max, int* pCount);
+void SortList(char* key);
 
-int SearchListByName(USERDATA* pUser, char* pszName);
-
-void** SearchBySortedAgeRange(int min, int max, int* pCount);
-void** SearchByAgeRange(int min, int max, int* pCount);
-
-int RemoveNodeByName(char* pszName);
+int LoadListFromFile(void);
+int SaveListToFile(void);

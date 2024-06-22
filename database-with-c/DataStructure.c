@@ -10,13 +10,12 @@
 
 int main(void)
 {
-
-	ResetList();
-
-	InitDummyData();
-
+	InitList();
+	LoadListFromFile();
 	EventLoopRun();
 
+	////SaveListToFile();
+	//TODO: To fix Sort
 	ReleaseList();
 
 	return 0;

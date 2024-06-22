@@ -3,316 +3,269 @@
 #include <string.h>
 #include "list.h"
 
-USERDATA g_HeadNode = { 0, "__DummyHead__" };
-USERDATA g_TailNode = { 0, "__DummyTail__" };
-static unsigned int g_listLen = 0;
 
-USERDATA** g_idxListAge = NULL;
-USERDATA** g_idxListName = NULL;
+NODE g_HeadNode = { 0 };
+NODE g_TailNode = { 0 };
 
+static unsigned int g_listCount = 0;
 
-unsigned int GetListLength()
-{
-	return g_listLen;
-}
+NODE** g_idxListPage = NULL;
 
-unsigned int RecalcListLen(void)
-{
-	unsigned int cnt = 0;
-	USERDATA* pTmp = g_HeadNode.pNext;
-	while (pTmp != &g_TailNode)
-	{
-		++cnt;
-		pTmp = pTmp->pNext;
-	}
-	g_listLen = cnt;
-
-	return g_listLen;
-}
-
-void ResetList(void)
-{
-	g_HeadNode.pNext = &g_TailNode;
-	g_TailNode.pPrev = &g_HeadNode;
-	g_listLen = 0;
-
-	ReleaseIndex();
-}
-
-
-void** MakeIndexAge(unsigned int* pCnt)
-{
-	if (IsEmpty())
-		return NULL;
-
-	*pCnt = GetListLength();
-
-	USERDATA** idxList;
-	idxList = malloc(sizeof(USERDATA*) * *pCnt);
-	memset(idxList, 0, sizeof(USERDATA*) * *pCnt);
-
-	USERDATA* pTmp = g_HeadNode.pNext;
-
-	for (int i = 0; pTmp != &g_TailNode; ++i)
-	{
-		idxList[i] = pTmp;
-		pTmp = pTmp->pNext;
-	}
-
-	for (int i = 0; i < *pCnt - 1; ++i)
-	{
-		for (int j = i + 1; j < *pCnt; ++j)
-		{
-			if (idxList[i]->age > idxList[j]->age)
-			{
-				pTmp = idxList[i];
-				idxList[i] = idxList[j];
-				idxList[j] = pTmp;
-			}
-		}
-	}
-
-	return idxList;
-}
-
-
-void** MakeIndexName(int* pCnt)
-{
-	*pCnt = 0;
-	if (IsEmpty())
-		return NULL;
-
-	*pCnt = GetListLength();
-
-	USERDATA** idxList;
-	idxList = malloc(sizeof(USERDATA*) * *pCnt);
-	memset(idxList, 0, sizeof(USERDATA*) * *pCnt);
-
-	USERDATA* pTmp = g_HeadNode.pNext;
-	for (int i = 0; pTmp != &g_TailNode; ++i)
-	{
-		idxList[i] = pTmp;
-		pTmp = pTmp->pNext;
-	}
-
-	for (unsigned int i = 0; i < *pCnt - 1; ++i)
-	{
-		for (unsigned int j = i + 1; j < *pCnt; ++j)
-		{
-			if (strcmp(idxList[i]->name, idxList[j]->name) > 0)
-			{
-				USERDATA* pTmp = idxList[i];
-				idxList[i] = idxList[j];
-				idxList[j] = pTmp;
-			}
-		}
-	}
-
-	return idxList;
-}
 
 void ReleaseIndex(void)
 {
-	if (g_idxListAge != NULL)
+	if (g_idxListPage != NULL)
 	{
-		free(g_idxListAge);
-		g_idxListAge = NULL;
-	}
-
-	if (g_idxListName != NULL)
-	{
-		free(g_idxListName);
-		g_idxListName = NULL;
+		free(g_idxListPage);
+		g_idxListPage = NULL;
 	}
 
 	return;
 }
 
-void UpdateIndex(void)
+NODE** UpdateIndex(void)
 {
 	ReleaseIndex();
 
 	int cnt = 0;
-	g_idxListAge = (USERDATA**)MakeIndexAge(&cnt);
-	g_idxListName = (USERDATA**)MakeIndexName(&cnt);
+	g_idxListPage = MakeIndexPage(&cnt);
+
+	return g_idxListPage;
 }
 
-void ReleaseList(void)
-{
-	USERDATA* pTmp = g_HeadNode.pNext;
-	USERDATA* pDelete;
-
-	while (pTmp != NULL && pTmp != &g_TailNode)
-	{
-		pDelete = pTmp;
-		pTmp = pTmp->pNext;
-
-		free(pDelete);
-	}
-
-	ResetList();
-	ReleaseIndex();
-}
-
-int IsEmpty(void)
-{
-	if (g_HeadNode.pNext == &g_TailNode)
-		return 1;
-
-	return 0;
-}
-
-void AddNewNodeAtTail(int age, const char* pszName, const char* pszPhone) // Queue
-{
-	USERDATA* pNewNode = (USERDATA*)malloc(sizeof(USERDATA));
-
-	pNewNode->age = age;
-	strcpy_s(pNewNode->name, sizeof(pNewNode->name), pszName);
-	strcpy_s(pNewNode->phone, sizeof(pNewNode->phone), pszPhone);
-	pNewNode->pPrev = NULL;
-	pNewNode->pNext = NULL;
-
-	USERDATA* pPrevNode = g_TailNode.pPrev;
-	pNewNode->pPrev = pPrevNode;
-	pNewNode->pNext = &g_TailNode;
-
-	pPrevNode->pNext = pNewNode;
-	g_TailNode.pPrev = pNewNode;
-
-	++g_listLen;
-	UpdateIndex();
-}
-
-void Push(USERDATA* pUser)
-{
-	USERDATA* pNewNode = (USERDATA*)malloc(sizeof(USERDATA));
-
-	memcpy(pNewNode, pUser, sizeof(USERDATA));
-
-	pNewNode->pPrev = NULL;
-	pNewNode->pNext = NULL;
-
-	USERDATA* pNextNode = g_HeadNode.pNext;
-	pNewNode->pPrev = &g_HeadNode;
-	pNewNode->pNext = pNextNode;
-
-	pNextNode->pPrev = pNewNode;
-	g_HeadNode.pNext = pNewNode;
-}
-
-USERDATA* Pop(void)
+NODE** MakeIndexPage(unsigned int* pCnt)
 {
 	if (IsEmpty())
 		return NULL;
 
-	USERDATA* pPop = g_HeadNode.pNext;
-	g_HeadNode.pNext = pPop->pNext;
-	pPop->pNext->pPrev = pPop->pPrev;
+	*pCnt = GetListCount();
 
-	return pPop;
-}
+	NODE** idxList;
+	idxList = malloc(sizeof(NODE*) * (*pCnt));
+	memset(idxList, 0, sizeof(NODE*) * (*pCnt));
 
-USERDATA* Dequeue(void)
-{
-	return Pop();
-}
+	NODE* pTmp = g_HeadNode.pNext;
 
-void Enqueue(USERDATA* pUser)
-{
-	AddNewNodeAtTail(pUser->age, pUser->name, pUser->phone);
-}
-
-int SearchListByName(USERDATA* pUser, char* pszName)
-{
-	USERDATA* pTmp = g_HeadNode.pNext;
-
-	while (pTmp != &g_TailNode)
+	for (unsigned int i = 0; pTmp != &g_TailNode; ++i)
 	{
-		if (strcmp(pTmp->name, pszName) == 0)
-		{
-			memcpy(pUser, pTmp, sizeof(USERDATA));
-			return 1;
-		}
-
+		idxList[i] = pTmp;
 		pTmp = pTmp->pNext;
 	}
 
-	return 0;
+	USERDATA* pSelected;
+	USERDATA* pCmp;
+	for (unsigned int i = 0; i < *pCnt - 1; ++i)
+	{
+		for (unsigned int j = i + 1; j < *pCnt; ++j)
+		{
+			pSelected = (USERDATA*)idxList[i]->pData;
+			pCmp = (USERDATA*)idxList[j]->pData;
+
+			if (pSelected->page > pCmp->page)
+			{
+				NODE* pTmp = idxList[i];
+				idxList[i] = idxList[j];
+				idxList[j] = pTmp;
+			}
+		}
+	}
+
+	return idxList;
 }
 
-void** SearchBySortedAgeRange(int min, int max, int* pCount) // after sorting
+void InitList(void)
 {
-	*pCount = 0;
-	USERDATA* pMin = NULL;
-	USERDATA* pMax = NULL;
-	USERDATA* pTmp = g_HeadNode.pNext;
+	ReleaseList();
+	g_HeadNode.pNext = &g_TailNode;
+	g_TailNode.pPrev = &g_HeadNode;
+	g_listCount = 0;
+}
+
+void ReleaseList(void)
+{
+	if (IsEmpty())
+		return NULL;
+
+	NODE* pTmp = g_HeadNode.pNext;
+	NODE* pDelete;
 
 	while (pTmp != &g_TailNode)
 	{
-		if (pTmp->age >= min)
-		{
-			pMin = pTmp;
-			break;
-		}
+		pDelete = pTmp;
 		pTmp = pTmp->pNext;
+		free(pDelete->pData);
+		free(pDelete);
 	}
 
-	if (pMin != NULL)
-		pTmp = pMin->pNext;
+	g_HeadNode.pNext = &g_TailNode;
+	g_TailNode.pPrev = &g_HeadNode;
+	g_listCount = 0;
+
+	ReleaseIndex();
+}
+
+unsigned int GetListCount(void)
+{
+	return g_listCount;
+}
+
+int IsEmpty(void)
+{
+	return (g_HeadNode.pNext == &g_TailNode || g_HeadNode.pNext == NULL);
+}
+
+void* GetKey(void* thisPointer, const char* key)
+{
+	USERDATA* pData = (USERDATA*)thisPointer;
+	if (strcmp(key, "page") == 0) {
+		int* pPage = (int*)malloc(sizeof(int));
+		if (pPage == NULL) {
+			return NULL;
+		}
+		*pPage = pData->page;
+		return pPage;
+	}
+	else if (strcmp(key, "title") == 0) {
+		return pData->title;
+	}
+	else if (strcmp(key, "author") == 0) {
+		return pData->author;
+	}
 	else
-		pTmp = g_HeadNode.pNext;
+		return NULL;
+}
 
-	while (pTmp != &g_TailNode)
+void SwapNode(NODE* pLeft, NODE* pRight)
+{
+	void* pTmp = pLeft->pData;
+	pLeft->pData = pRight->pData;
+	pRight->pData = pTmp;
+}
+
+void AddNewNode(int page, char* pszTitle, char* pszAuthor)
+{
+	USERDATA* pNewData = calloc(1, sizeof(USERDATA));
+	pNewData->page = page;
+	strcpy_s(pNewData->title, sizeof(pNewData->title), pszTitle);
+	strcpy_s(pNewData->author, sizeof(pNewData->author), pszAuthor);
+
+	NODE* pNewNode = calloc(1, sizeof(NODE));
+	pNewNode->pData = pNewData;
+	pNewNode->GetKey = GetKey;
+
+	NODE* pLastNode = g_TailNode.pPrev;
+	pLastNode->pNext = pNewNode;
+	pNewNode->pPrev = pLastNode;
+	pNewNode->pNext = &g_TailNode;
+	g_TailNode.pPrev = pNewNode;
+
+	++g_listCount;
+
+	UpdateIndex();
+}
+
+void RemoveNodeByKeyword(char* pszUserInput, char* key, int* pCount)
+{
+	NODE* pCur = g_HeadNode.pNext;
+	NODE* pToRemove;
+	NODE* pPrevNode;
+	NODE* pNextNode;
+	USERDATA* pData;
+
+	int cnt = 0;
+
+	while (pCur != NULL && pCur != &g_TailNode)
 	{
-		if (pTmp->age > max)
-			break;
+		char* pSelected = (char*)pCur->GetKey(pCur->pData, key);
+		if (strstr(pSelected, pszUserInput) != NULL)
+		{
+			pPrevNode = pCur->pPrev;
+			pNextNode = pCur->pNext;
+			pPrevNode->pNext = pCur->pNext;
+			pNextNode->pPrev = pCur->pPrev;
 
-		if (pTmp->age >= min && pTmp->age <= max)
-			pMax = pTmp;
-		
+			pToRemove = pCur;
+			pCur = pCur->pNext;
+
+			free(pToRemove->pData);
+			free(pToRemove);
+
+			--g_listCount;
+			++cnt;
+		}
+
+		else
+			pCur = pCur->pNext;
+	}
+
+	if (cnt)
+	{
+		*pCount = cnt;
+		UpdateIndex();
+	}
+
+	return;
+}
+
+void** SearchListByKeyword(char* pszUserInput, char* key, int* pCount)
+{
+	if (IsEmpty())
+		return NULL;
+
+	*pCount = 0;
+	NODE* pTmp = g_HeadNode.pNext;
+	int cnt = 0;
+	char* pTmpData = NULL;
+
+	while (pTmp != &g_TailNode) {
+
+		pTmpData = (char*)pTmp->GetKey(pTmp->pData, key);
+		USERDATA* pData = (USERDATA*)pTmp->pData;
+		if (strstr(pTmpData, pszUserInput) != NULL)
+			++cnt;
+
 		pTmp = pTmp->pNext;
 	}
 
-	if (pMin != NULL && pMax != NULL)
-	{
-		pTmp = pMin;
-		int cnt = 1;
+	if (cnt == 0)
+		return NULL;
 
-		while (pTmp != pMax)
-		{
+	void** pResultList = malloc(sizeof(void*) * cnt);
+	if (pResultList == NULL)
+		return NULL;
+
+	*pCount = cnt;
+
+	cnt = 0;
+	pTmp = g_HeadNode.pNext;
+
+	while (pTmp != &g_TailNode) {
+		USERDATA* pData = (USERDATA*)pTmp->pData;
+		pTmpData = (char*)pTmp->GetKey(pTmp->pData, key);
+		if (strstr(pTmpData, pszUserInput) != NULL) {
+			pResultList[cnt] = pTmp->pData;
 			++cnt;
-			pTmp = pTmp->pNext;
 		}
-
-		*pCount = cnt;
-		void** pResultList = malloc(sizeof(void*) * cnt);
-
-		pTmp = pMin;
-		for (int i = 0; i < cnt; ++i)
-		{
-			pResultList[i] = pTmp;
-			pTmp = pTmp->pNext;
-		}
-	
-		return pResultList;
+		pTmp = pTmp->pNext;
 	}
 
-	return NULL;
-	
+	return pResultList;
 }
 
-void** SearchByAgeRange(int min, int max, int* pCount)
+void** SearchListByPageRange(int min, int max, int* pCount)
 {
 	*pCount = 0;
 	unsigned int listLen = 0;
-	USERDATA** idxList = (USERDATA**)MakeIndexAge(&listLen);
+	NODE** idxList = (NODE**)MakeIndexPage(&listLen);
+	USERDATA* pData;
 
 	int idxMin = -1, idxMax = 0;
 
 	unsigned int i = 0;
 	for (i = 0; i < listLen; ++i)
 	{
-		if (idxList[i]->age >= min && idxList[i]->age <= max)
+		pData = idxList[i]->pData;
+		if (pData->page >= min && pData->page <= max)
 		{
 			idxMin = i;
 			idxMax = i;
@@ -324,14 +277,15 @@ void** SearchByAgeRange(int min, int max, int* pCount)
 	{
 		for (; i < listLen; ++i)
 		{
-			if (idxList[i]->age > max)
+			pData = idxList[i]->pData;
+			if (pData->page > max)
 				break;
-			else if (idxList[i]->age <= max)
+			else if (pData->page <= max)
 				idxMax = i;
 		}
 
 		int resultLen = idxMax - idxMin + 1;
-		USERDATA** resultList = malloc(sizeof(void*) * resultLen);
+		NODE** resultList = malloc(sizeof(void*) * resultLen);
 		memcpy(resultList, idxList + idxMin, sizeof(void*) * resultLen);
 
 		free(idxList);
@@ -342,14 +296,18 @@ void** SearchByAgeRange(int min, int max, int* pCount)
 	return NULL;
 }
 
-void SortListByName(void)
+void SortList(char* key)
 {
 	if (IsEmpty())
 		return;
 
-	USERDATA* pTmp = g_HeadNode.pNext;
-	USERDATA* pSelected = NULL;
-	USERDATA* pCmp = NULL;
+	UpdateIndex();
+
+	NODE* pTmp = g_HeadNode.pNext;
+	NODE* pSelected = NULL;
+	NODE* pCmp = NULL;
+	char* dataSelected = NULL;
+	char* dataToComp = NULL;
 
 	while (pTmp != NULL && pTmp != g_TailNode.pPrev)
 	{
@@ -358,7 +316,10 @@ void SortListByName(void)
 
 		while (pCmp != NULL && pCmp != &g_TailNode)
 		{
-			if (strcmp(pSelected->name, pCmp->name) > 0)
+			dataSelected = (char*)pSelected->GetKey(pSelected->pData, key);
+			dataToComp = (char*)pCmp->GetKey(pCmp->pData, key);
+
+			if (strcmp(dataSelected, dataToComp) > 0)
 				pSelected = pCmp;
 
 			pCmp = pCmp->pNext;
@@ -371,87 +332,53 @@ void SortListByName(void)
 		pTmp = pTmp->pNext;
 	}
 
+	if (strcmp(key, "page") == 0) {
+
+		if (dataSelected != NULL ||
+			dataToComp != NULL)
+		{
+			free(dataSelected);
+			free(dataToComp);
+		}
+	}
 }
 
-void SortListByAge(void)
+// Functions for File I/O
+int LoadListFromFile(void)
 {
-	if (IsEmpty())
-		return;
+	ReleaseList();
+	FILE* fp = NULL;
+	fopen_s(&fp, "data.dat", "rb");
+	if (fp == NULL)
+		return 0;
 
-	USERDATA* pTmp = g_HeadNode.pNext;
-	USERDATA* pSelected = NULL;
-	USERDATA* pCmp = NULL;
-
-	while (pTmp != NULL && pTmp != g_TailNode.pPrev)
+	USERDATA user = { 0 };
+	while (fread(&user, sizeof(USERDATA), 1, fp) > 0)
 	{
-		pSelected = pTmp;
-		pCmp = pTmp->pNext;
+		AddNewNode(user.page, user.title, user.author);
+		memset(&user, 0, sizeof(USERDATA));
+	}
 
-		while (pCmp != &g_TailNode)
-		{
-			if (pSelected->age > pCmp->age)
-				pSelected = pCmp;
+	UpdateIndex();
 
-			pCmp = pCmp->pNext;
-		}
+	fclose(fp);
+	return 1;
+}
 
-		if (pSelected != pTmp)
-			SwapNode(pTmp, pSelected);
+int SaveListToFile(void)
+{
+	FILE* fp = NULL;
+	fopen_s(&fp, "data.dat", "wb");
+	if (fp == NULL)
+		return 0;
 
-		pSelected = NULL;
+	NODE* pTmp = g_HeadNode.pNext;
+	while (pTmp != NULL && pTmp != &g_TailNode)
+	{
+		fwrite(pTmp->pData, sizeof(USERDATA), 1, fp);
 		pTmp = pTmp->pNext;
 	}
-}
 
-int RemoveNodeByName(char* pszName)
-{
-	USERDATA* pCur = g_HeadNode.pNext;
-	USERDATA* pPrevNode;
-	USERDATA* pNextNode;
-
-	while (pCur != NULL && pCur != &g_TailNode)
-	{
-		if (strcmp(pCur->name, pszName) == 0)
-		{
-			pPrevNode = pCur->pPrev;
-			pNextNode = pCur->pNext;
-			pPrevNode->pNext = pCur->pNext;
-			pNextNode->pPrev = pCur->pPrev;
-
-			free(pCur);
-			--g_listLen;
-			UpdateIndex();
-			return 1;
-		}
-
-		pCur = pCur->pNext;
-	}
-
-	return 0;
-}
-
-void RemoveNode(USERDATA* pRemove)
-{
-
-	USERDATA* pPrev = pRemove->pPrev;
-	USERDATA* pNext = pRemove->pNext;
-
-	pPrev->pNext = pRemove->pNext;
-	pNext->pPrev = pRemove->pPrev;
-
-	free(pRemove);
-}
-
-void CopyNodeData(USERDATA* pDest, USERDATA* pOri)
-{
-	pDest->age = pOri->age;
-	strcpy_s(pDest->name, sizeof(pDest->name), pOri->name);
-	strcpy_s(pDest->phone, sizeof(pDest->phone), pOri->phone);
-}
-
-void SwapNode(USERDATA* pLeft, USERDATA* pRight)
-{
-	USERDATA tmp = *pLeft;
-	CopyNodeData(pLeft, pRight);
-	CopyNodeData(pRight, &tmp);
+	fclose(fp);
+	return 1;
 }

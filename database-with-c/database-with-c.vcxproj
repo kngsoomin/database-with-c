@@ -129,11 +129,13 @@
   <ItemGroup>
     <ClCompile Include="DataStructure.c" />
     <ClCompile Include="list.c" />
+    <ClCompile Include="oldlist.c" />
     <ClCompile Include="test.c" />
     <ClCompile Include="ui.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="list.h" />
+    <ClInclude Include="oldlist.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="ui.h" />
   </ItemGroup>
