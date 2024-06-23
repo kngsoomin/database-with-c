@@ -112,6 +112,11 @@ void EventLoopRun(void)
 		putchar('\n');
 		puts("Saved!\n");
 	}
+	else
+	{
+		putchar('\n');
+		putchar('\n');
+	}	
 	
 	puts("Thank you for using the database program. Goodbye!");
 }

@@ -2,7 +2,7 @@
 #### Version 1.0 
 
 ### 🎥 Demo
-![Project Demo](demo.gif) 
+![Project Demo](/static/demo.gif) 
 
 ### 🌄 Objectives
 The aim of this project is to develop a database management program in C that is capable of:  
@@ -15,7 +15,7 @@ The aim of this project is to develop a database management program in C that is
   
 ### 🐈‍⬛ Features
 <h4 id="section-1"> 1. Separation of Concerns </h4>
-<img src="code-structure.png" width=600/>
+<img src="/static/code-structure.png" width=600/>
 <br/>
 The <code>Node</code> structure handles the linked list functionality, while the <code>USERDATA</code> structure contains the actual data. This approach enhances modularity and makes the code easier to maintain.
 <br/>
