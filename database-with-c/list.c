@@ -117,6 +117,7 @@ int IsEmpty(void)
 void* GetKey(void* thisPointer, const char* key)
 {
 	USERDATA* pData = (USERDATA*)thisPointer;
+
 	if (strcmp(key, "page") == 0) {
 		int* pPage = (int*)malloc(sizeof(int));
 		if (pPage == NULL) {
@@ -301,8 +302,6 @@ void SortList(char* key)
 	if (IsEmpty())
 		return;
 
-	UpdateIndex();
-
 	NODE* pTmp = g_HeadNode.pNext;
 	NODE* pSelected = NULL;
 	NODE* pCmp = NULL;
@@ -313,15 +312,21 @@ void SortList(char* key)
 	{
 		pSelected = pTmp;
 		pCmp = pTmp->pNext;
-
 		while (pCmp != NULL && pCmp != &g_TailNode)
 		{
-			dataSelected = (char*)pSelected->GetKey(pSelected->pData, key);
-			dataToComp = (char*)pCmp->GetKey(pCmp->pData, key);
+			char* dataSelected = (char*)pSelected->GetKey(pSelected->pData, key);
+			char* dataToComp = (char*)pCmp->GetKey(pCmp->pData, key);
 
-			if (strcmp(dataSelected, dataToComp) > 0)
-				pSelected = pCmp;
-
+			if (strcmp(key, "page") == 0)
+			{
+				if (*(int*)dataSelected > *(int*)dataToComp)
+					pSelected = pCmp;
+			}
+			else
+			{
+				if (strcmp(dataSelected, dataToComp) > 0)
+					pSelected = pCmp;
+			}
 			pCmp = pCmp->pNext;
 		}
 
