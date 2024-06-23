@@ -13,7 +13,7 @@ The aim of this project is to develop a database management program in C that is
 - [Separation of Linked List and UI Code](#section-5)
 - [Distinction Between Data Stored in Files and Data Loaded in Memory](#section-6)
   
-### 🐈‍⬛ Features
+### 🦔 Features
 <h4 id="section-1"> 1. Separation of Concerns </h4>
 <img src="/static/code-structure.png" width=600/>
 <br/>
