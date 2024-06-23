@@ -11,10 +11,11 @@
 int main(void)
 {
 	InitList();
+
 	LoadListFromFile();
+
 	EventLoopRun();
 
-	//SaveListToFile();
 	ReleaseList();
 
 	return 0;

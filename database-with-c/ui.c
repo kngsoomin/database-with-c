@@ -64,7 +64,7 @@ QUERY ParseQuery(const char* query)
 
 void PrintGreetings(void)
 {
-	printf("database-with-c (version 1.0.0)\n\n");
+	printf("database-with-c (version 1.0)\n\n");
 	printf("Greetings! ");
 	printf("Welcome to the C-based Database Program.\n");
 	printf("You can query the database with SQL queries,\n");
@@ -103,6 +103,16 @@ void EventLoopRun(void)
 			break;
 		}
 	}
+
+	printf("Do you want to save changes to file? (y/n)");
+	char ch = _getch();
+	if (ch == 'y' || ch == 'Y')
+	{
+		SaveListToFile();
+		putchar('\n');
+		puts("Saved!\n");
+	}
+	
 	puts("Thank you for using the database program. Goodbye!");
 }
 
