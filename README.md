@@ -73,9 +73,8 @@ The system operates primarily on in-memory data, but interacts with files in the
 ### 🚀 Future Improvements
 <ul>
   <li>Implement data caching for improved efficiency with large datasets, allowing for partial loading and updates, modifying only changed portions of the file</li>
-  <li>Add roll-back functionality for operations that allows users to undo recent changes</li>
+  <li>Add roll-back functionality for operations, allowing users to undo recent changes</li>
   <li>Enhance input validation and error handling to implement more thorough checks for user input</li>
   <li>Upgrade to a more robust data structure such as tree structure instead of a doubly linked list</li>
-  <li>Multi-threading support for improved performance on large datasets</li>
   <li>Implementation of more complex SQL operations (e.g., JOINs, GROUP BY)</li>
 </ul>
