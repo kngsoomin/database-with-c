@@ -25,11 +25,27 @@ The system can parse and execute SQL-like queries. This allows for a familiar an
 <h4 id="section-3"> 3. Comprehensive Database Operations </h4>
 Supported operations include:<br/>
 <ul>
-<li>SELECT</li>
-<li>WHERE</li>
-<li>DELETE</li>
-<li>INSERT</li>
-<li>ORDER BY</li>
+<li>
+<b><</b> <strong>SELECT</strong> <b>></b><br/>
+<img src="/static/capture1-select-all.png" width=700/>
+</li>
+<li>
+<b><</b> <strong>WHERE</strong> <b>></b><br/>
+<img src="/static/capture5-where.png" width=700/>
+</li>
+<li>
+<b><</b> <strong>ORDER BY</strong> <b>></b><br/>
+<img src="/static/capture3-order.png" width=700/>
+</li>
+<li>
+<b><</b> <strong>INSERT</strong> <b>></b><br/>
+<img src="/static/capture2-insert.png" width=700/>
+</li>
+<li>
+<b><</b> <strong>DELETE</strong> <b>></b><br/>
+<img src="/static/capture4-delete.png" width=700/>
+</li>
+
 </ul>
 
 These operations are efficiently handled within the doubly linked list structure.
