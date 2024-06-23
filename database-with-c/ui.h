@@ -1,13 +1,17 @@
 #pragma once
 
-typedef enum MY_MENU
+typedef enum QUERY
 {
-	EXIT, NEW, SEARCH, SORTLIST, PRINT, REMOVE
-} MY_MENU;
+	EXIT, SELECT, INSERT, DELETE, ORDER, UNRECOGNIZED
+} QUERY;
 
-MY_MENU PrintMenu(void);
+QUERY GetQueryFromUser(char* pQuery);
+void ClearInputBuffer();
+QUERY ParseQuery(const char* query);
 void PrintGreetings(void);
+void EventLoopRun(void);
 
+void PrintHeader(int title, int author, int page);
 void PrintRow(USERDATA* pUser, int title, int author, int page);
 void PrintSelectedCols(int title, int author, int page);
 void PrintAllData(int wait);
@@ -25,20 +29,3 @@ void Insert(char* query);
 void Delete(char* query);
 void Search(char* query);
 void Order(char* query);
-
-void EventLoopRun(void);
-
-
-
-
-//typedef enum MY_MENU { EXIT, NEW, SEARCH, PRINT, REMOVE } MY_MENU;
-//
-//MY_MENU PrintMenu(void);
-//void PrintList(void);
-//void PrintListReverse(void);
-//void EventLoopRun(void);
-//
-//void SearchByName(void);
-//void SearchByAge(void);
-//
-//void RemoveByName(void);

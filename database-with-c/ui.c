@@ -8,24 +8,126 @@
 
 
 // Console handling
-MY_MENU PrintMenu(void)
+QUERY GetQueryFromUser(char* pQuery)
 {
-	MY_MENU input = 0;
+	QUERY input = 0;
 
 	system("cls");
+
 	PrintGreetings();
-	printf("[1]New\t[2]Search\t[3]Sort\t[4]Print\t[5]Remove\t[0]Exit\n");
-	scanf_s("%d%*c", &input);
-	return input;
+
+	printf("Write your query to execute : ");
+
+	if (scanf_s("%99[^\n]", pQuery, 100) == 1) {
+		ClearInputBuffer();
+		return ParseQuery(pQuery);
+	}
+	else {
+		ClearInputBuffer();
+		return UNRECOGNIZED;
+	}
+}
+
+void ClearInputBuffer() 
+{
+	// To clear the input buffer after reading the query
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF);
+}
+
+QUERY ParseQuery(const char* query) 
+{
+	char lowered_query[100];
+
+	strcpy_s(lowered_query, sizeof(lowered_query), query);
+	ToLowerCase(lowered_query);
+
+	if (strncmp(lowered_query, "delete", 6) == 0) 
+		return DELETE;
+
+	else if (strncmp(lowered_query, "insert", 6) == 0) 
+		return INSERT;
+
+	else if (strncmp(lowered_query, "select", 6) == 0) 
+	{
+		if (strstr(lowered_query, "order by") != NULL)
+			return ORDER;
+
+		else
+			return SELECT;
+	}
+	else if (strncmp(lowered_query, "exit", 4) == 0)
+		return EXIT;
+
+	return UNRECOGNIZED;
 }
 
 void PrintGreetings(void)
 {
-	printf("Greetings!\n");
-	printf("Welcome to the C-based Database Program.\n\n");
+	printf("database-with-c (version 1.0.0)\n\n");
+	printf("Greetings! ");
+	printf("Welcome to the C-based Database Program.\n");
+	printf("You can query the database with SQL queries,\n");
+	printf("such as SELECT, INSERT, DELETE, and ORDER BY.\n");
+	printf("If you would like to see the examples or know more about project,\n");
+	printf("please visit 'https://github.com/kngsoomin/database-with-c'.\n\n");
+}
+
+void EventLoopRun(void)
+{
+	QUERY input = 0;
+	char query[100] = { 0 };
+
+	while ((input = GetQueryFromUser(&query)) != 0)
+	{
+		switch (input)
+		{
+		case SELECT:
+			Search(query);
+			break;
+
+		case DELETE:
+			Delete(query);
+			break;
+
+		case INSERT:
+			Insert(query);
+			break;
+
+		case ORDER:
+			Order(query);
+			break;
+
+		case UNRECOGNIZED:
+		default:
+			break;
+		}
+	}
+	puts("Thank you for using the database program. Goodbye!");
 }
 
 // Print functions
+void PrintHeader(int title, int author, int page)
+{
+	if (title + author + page != 0)
+	{
+		if (title)
+			printf("%-40s\t", "Title");
+		if (author)
+			printf("%-15s\t", "Author");
+		if (page)
+			printf("%s", "Page");
+		putchar('\n');
+		if (title)
+			printf("%-40s\t", "========================================");
+		if (author)
+			printf("%-15s\t", "==============");
+		if (page)
+			printf("%s", "====");
+		putchar('\n');
+	}
+}
+
 void PrintRow(USERDATA* pUser, int title, int author, int page)
 {
 	if (title)
@@ -43,30 +145,16 @@ void PrintSelectedCols(int title, int author, int page)
 	NODE* pTmp = g_HeadNode.pNext;
 	USERDATA* pUser = NULL;
 
-	if (title + author + page != 0)
-	{
-		if (title)
-			printf("%-40s\t", "Title");
-		if (author)
-			printf("%-15s\t", "Author");
-		if (page)
-			printf("%s","Page");
-		putchar('\n');
-		if (title)
-			printf("%-40s\t", "========================================");
-		if (author)
-			printf("%-15s\t", "==============");
-		if (page)
-			printf("%s", "====");
-		putchar('\n');
-	}
+	PrintHeader(title, author, page);
+
 	while (pTmp != NULL && pTmp != &g_TailNode)
 	{
 		pUser = pTmp->pData;
 		PrintRow(pUser, title, author, page);
 		pTmp = pTmp->pNext;
 	}
-
+	
+	putchar('\n');
 	printf("[Alert] %d row(s) found for your query.\n", GetListCount());
 }
 
@@ -78,11 +166,6 @@ void PrintAllData(int wait)
 
 	if (wait)
 		_getch();
-}
-
-void parseAndExecuteSQL(const char* sql)
-{
-	return;
 }
 
 // Functions for string manipulation
@@ -98,22 +181,18 @@ char* TrimSpecialChars(char* str)
 {
 	char* end;
 
-	// Trim leading characters
 	while (*str == ' ' || *str == '\'' || *str == '%') {
 		str++;
 	}
 
-	// If all str are trimmed
 	if (*str == 0) 
 		return str;
 
-	// Trim trailing characters
 	end = str + strlen(str) - 1;
 	while (end > str && (*end == ' ' || *end == '\'' || *end == '%')) {
 		end--;
 	}
 
-	// Write new null terminator
 	*(end + 1) = 0;
 
 	return str;
@@ -125,6 +204,7 @@ void InsertNewRow(int page, char* pszTitle, char* pszAuthor)
 	AddNewNode(page, pszTitle, pszAuthor);
 
 	PrintAllData(0);
+	putchar('\n');
 	printf("[Alert] 1 row has been added.\n");
 	
 	_getch();
@@ -136,9 +216,9 @@ void DeleteRows(char* pszKeyword, char* pszKey)
 	RemoveNodeByKeyword(pszKeyword, pszKey, &cnt);
 
 	if (cnt != 0)
-		printf("[Alert] %d row(s) have been deleted successfully.\n", cnt);
+		printf("\n[Alert] %d row(s) have been deleted successfully.\n", cnt);
 	else
-		printf("[Alert] The query returned an empty result set.\n");
+		printf("\n[Alert] The query returned an empty result set.\n");
 
 	_getch();
 }
@@ -153,17 +233,22 @@ void SearchByKeyword(char* pszKeyword, char* pszKey, int title, int author, int 
 
 	if (cnt != 0)
 	{
+		PrintHeader(title, author, page);
 		for (int i = 0; i < cnt; ++i)
 		{
 			pTmp = (USERDATA*)pResult[i];
 			PrintRow(pTmp, title, author, page);
 		}
+		putchar('\n');
 		printf("[Alert] %d row(s) found for your query.\n", cnt);
 
 		free(pResult);
 	}
 	else
+	{
+		putchar('\n');
 		printf("[Alert] The query returned an empty result set.\n");
+	}
 
 	_getch();
 }
@@ -178,18 +263,23 @@ void SearcyByPageRange(int min, int max, int title, int author, int page)
 	if (cnt)
 	{
 		USERDATA* pTmp = NULL;
+
+		PrintHeader(title, author, page);
 		for (int i = 0; i < cnt; ++i)
 		{
 			pTmp = (USERDATA*)pResultList[i]->pData;
 			PrintRow(pTmp, title, author, page);
 		}
-
+		putchar('\n');
 		printf("[Alert] %d row(s) found for your query.\n", cnt);
 
 		free(pResultList);
 	}
 	else
+	{
+		putchar('\n');
 		printf("[Alert] The query returned an empty result set.\n");
+	}
 
 	_getch();
 
@@ -448,41 +538,4 @@ void Order(char* query)
 
 	PrintSelectedCols(colTitle, colAuthor, colPage);
 	_getch();
-}
-
-void EventLoopRun(void)
-{
-	MY_MENU menu = 0;
-
-	while ((menu = PrintMenu()) != 0)
-	{
-		switch (menu)
-		{
-		case NEW:
-			Insert("INSERT INTO DATABASE VALUES(197, Full Moon, Soomin)");
-			Insert("INSERT INTO DATABASE VALUES(697, Turkey, Abraham)");
-			break;
-
-		case SEARCH:
-			Search("SELECT title FROM DATABASE WHERE title LIKE '%a%'");
-			break;
-
-		case SORTLIST:
-			Order("SELECT * FROM DATABASE ORDER BY title");
-			Order("SELECT * FROM DATABASE ORDER BY page");
-			break;
-
-		case PRINT:
-			PrintAllData(1);
-			break;
-
-		case REMOVE:
-			Delete("DELETE FROM DATABASE WHERE title LIKE '%a%'");
-			break;
-
-		default:
-			break;
-		}
-	}
-	puts("Bye~!");
 }

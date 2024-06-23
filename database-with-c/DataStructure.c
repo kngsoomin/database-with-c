@@ -14,8 +14,7 @@ int main(void)
 	LoadListFromFile();
 	EventLoopRun();
 
-	////SaveListToFile();
-	//TODO: To fix Sort
+	//SaveListToFile();
 	ReleaseList();
 
 	return 0;
