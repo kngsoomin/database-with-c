@@ -1,80 +1,72 @@
-# Database Management Program with C
-#### Version 1.0 
+# Database Management System with C
+### Overview
+This project implements a lightweight database management system written in C.
+It focuses on core database concepts such as **data structure design, indexing, and SQL-like query parsing**, providing a minimal yet educational implementation of a relational data engine.
 
 ### 🎥 Demo
 ![Project Demo](/static/demo.gif) 
 
-### 🌄 Objectives
-The aim of this project is to develop a database management program in C that is capable of:  
-- [Separation of Data Structure and Data](#section-1)
-- [SQL Syntax Parsing and Execution](#section-2)
-- [Database Operations in a Doubly Linked List](#section-3)
-- [Separation of Index and Data Structure](#section-4)
-- [Separation of Linked List and UI Code](#section-5)
-- [Distinction Between Data Stored in Files and Data Loaded in Memory](#section-6)
+### Key Features
+**1. Structured and Modular Design**
+
+- Separation between data (USERDATA) and linked list nodes (Node)
   
-### 🦔 Features
-<h4 id="section-1"> 1. Separation of Concerns </h4>
-<img src="/static/code-structure.png" width=600/>
-<br/>
-The <code>Node</code> structure handles the linked list functionality, while the <code>USERDATA</code> structure contains the actual data. This approach enhances modularity and makes the code easier to maintain.
-<br/>
-<h4 id="section-2"> 2. SQL-Like Query Parsing </h4>
-The system can parse and execute SQL-like queries. This allows for a familiar and intuitive interface for database operations.
-<br/>
-<h4 id="section-3"> 3. Comprehensive Database Operations </h4>
-Supported operations include:<br/>
-<ul>
-<li>
-<b><</b> <strong>SELECT</strong> <b>></b><br/>
-<img src="/static/capture1-select-all.png" width=700/>
-</li>
-<li>
-<b><</b> <strong>WHERE</strong> <b>></b><br/>
-<img src="/static/capture5-where.png" width=700/>
-</li>
-<li>
-<b><</b> <strong>ORDER BY</strong> <b>></b><br/>
-<img src="/static/capture3-order.png" width=700/>
-</li>
-<li>
-<b><</b> <strong>INSERT</strong> <b>></b><br/>
-<img src="/static/capture2-insert.png" width=700/>
-</li>
-<li>
-<b><</b> <strong>DELETE</strong> <b>></b><br/>
-<img src="/static/capture4-delete.png" width=700/>
-</li>
+- Independent layers for data storage, index management, and UI interaction
+  
+- Improves modularity and maintainability of the codebase
 
-</ul>
+**2. SQL-Like Query Engine**
 
-These operations are efficiently handled within the doubly linked list structure.
-<br/>
-<h4 id="section-4"> 4. Optimized Index Management </h4>
-The index field is separated from the main data structures. This design choice allows for:
-<ul>
-<li>Efficient range searches on integer fields</li>
-<li>Avoiding the need to sort the entire data structure for searches</li>
-<li>Generating and sorting an array of indices for optimized operations</li>
-</ul>
+- Supports simplified SQL syntax:
+  - `SELECT`, `WHERE`, `ORDER BY`, `INSERT`, `DELETE`
+    
+- Queries are parsed and executed against in-memory data
+  
+- Designed for intuitive command-line interaction
 
-<h4 id="section-5"> 5. Modular Code Design </h4>
-The codebase is organized with a clear separation between linked list operations and user interface code.
-<br/>
-<h4 id="section-6"> 6. File vs Memory Data Management </h4>
-The system operates primarily on in-memory data, but interacts with files in the following ways:
-<ul>
-<li>Loads the initial database from a file into memory</li>
-<li>Allows users to make changes to the in-memory database</li>
-<li>Gives users the option to save their changes back to the file</li>
-</ul>
-<br/>
+  - *SELECT*:
+    
+    <img src="/static/capture1-select-all.png" width=700/>
 
-### 🚀 Future Improvements
-<ul>
-  <li>Implement data caching for improved efficiency with large datasets, allowing for partial loading and updates, modifying only changed portions of the file</li>
-  <li>Add roll-back functionality for operations, allowing users to undo recent changes</li>
-  <li>Enhance input validation and error handling to implement more thorough checks for user input</li>
-  <li>Upgrade to a more robust data structure such as tree structure instead of a doubly linked list</li>
-  <li>Implementation of more complex SQL operations (e.g., JOINs, GROUP BY)</li>
-</ul>
+  - *WHERE*:
+    
+    <img src="/static/capture5-where.png" width=700/>
+
+  - *ORDER BY*:
+  
+    <img src="/static/capture3-order.png" width=700/>
+
+  - *INSERT*:
+
+    <img src="/static/capture2-insert.png" width=700/>
+
+  - *DELETE*:
+
+    <img src="/static/capture4-delete.png" width=700/>
+
+
+**3. Doubly Linked List–Based Storage**
+
+- Core database operations are executed on a doubly linked list
+
+- Enables efficient traversal and manipulation of records
+
+- Demonstrates understanding of dynamic memory management in C
+
+
+**4. Indexing for Optimized Search**
+
+- Index fields are maintained separately from main data structures
+
+- Enables efficient range and key-based lookups without sorting the entire dataset
+
+- Provides a simple index mechanism for faster query execution
+
+
+**5. File and Memory Management**
+
+- Database is loaded from file into memory at startup
+
+- Users can modify in-memory data and selectively save changes back to disk
+
+- Demonstrates separation between persistent and transient data layers
